@@ -32,6 +32,24 @@ def main(argv):
     # Put each trial in a dict
     trials = get_trials(input_file)
 
+    # Load data into a csv file
+    column_headers = ['trial',
+                      'trial_type',
+                      'practice',
+                      'image',
+                      'letter',
+                      'locationid',
+                      'location',
+                      'expected',
+                      'TRIAL_INDEX',
+                      'KEYPRESS',
+                      'RESPONSE',
+                      'RT',
+                      'DISP_ON_TIME',
+                      'KEY_RESP_TIME',
+                      'soa',
+                      'SACCADE_RT']
+
 
 def validate_input(argv):
     ''' Ensure input argument is only argument provided and has .asc extension
@@ -50,9 +68,10 @@ def get_trials(ip_file):
         ip_file: string representation of a .asc output file from an
             eyetracker machine.
 
-    Returns: A list of trial dictionaries
+    Returns:
+        Returns a list of trial dictionaries
     '''
-    trials = []
+    trials_list = []
     # Get list of trials, each trial is long string
     trials_raw = ip_file.split('START\t')[1:]
 
@@ -61,21 +80,30 @@ def get_trials(ip_file):
         trials_raw[i] = trial.splitlines()
 
     # Split each trial line into a list of words
-    for trial in trials_raw:
-        for i, line in enumerate(trial):
-            trial[i] = line.split()
+    for i, trial in enumerate(trials_raw):
+        for j, line in enumerate(trial):
+            trial[j] = line.split()
 
         # Add trial to dict
-        to_dict(trial, trials)
+        trial_to_dict(trial, trials_list)
 
         # If RESPONSE is CORRECT, look for DRAW_LIST
+        resp = trials_list[i]['RESPONSE']
+        if 'CORRECT' in resp and len(resp) == 1:
+            # find line with DRAW_LIST
+            DRAW_line = get_line('DRAW_LIST', trial)
+            # Add timestamp to trial dict
+            timestamp = trial[DRAW_line][1]
+            trials_list[i]['IMG_DISP_TIME'] = timestamp
+        else:
+            trials_list[i]['IMG_DISP_TIME'] = None
 
         # Get timestamp of DRAW_LIST line
 
-    return trials
+    return trials_list
 
 
-def to_dict(trial, trial_list):
+def trial_to_dict(trial, trial_list):
     ''' Put trial into dictionary, and add dictionary to list argument.
 
 
@@ -84,7 +112,7 @@ def to_dict(trial, trial_list):
             line is a list of words from that line.
         trial_list: List to which trial will be appended
     '''
-    END_line = get_END_line(trial)
+    END_line = get_line('END', trial)
     # Use Constant offsets from END_line number to extract TRIAL_VAR data
     # and add it to a dictionary
     try:
@@ -117,26 +145,24 @@ def to_dict(trial, trial_list):
                 'split into a list of words.)')
 
 
-def get_END_line(trial):
-    ''' Finds the first line where the first word is 'END'.
+def get_line(pattern, trial):
+    ''' Finds the first line containing <pattern>.
 
 
     Args:
         trial: Nested list, each line split into list of words.
-
+        pattern: String to look for
     Returns:
-        Returns the line number of first 'END' encountered.
+        Returns the line number of first line containing <pattern>
     '''
     try:
-        # Find 'END' and get line number
+        # Find pattern and get line number
         for line_num, line in enumerate(trial):
-            if 'END' in line[0]:
-                END_line = line_num 
-                break
-        return END_line
-    
+            if pattern in line:
+                return line_num
+
     except NameError:
-        print('Error: "END" never found in trial')
+        print('Error: ', '"', pattern, '"', ' never found in trial')
 
 
 
