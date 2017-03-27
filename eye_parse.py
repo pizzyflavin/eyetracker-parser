@@ -2,26 +2,22 @@
 
 import sys, csv
 
-def main(fname):
+def main(argv):
+    # Verify correct input file given
+    fname = validate_input(argv)
+
     # Open file, read lines into a list
     with open(fname) as f:
-        file_lines = f.read().splitlines()
+        input_file = f.read()
 
-    image_access = [[], []]
 
-    # Search for keywords
-    for line in file_lines:
-        word_list = line.split()
-        if 'DRAW_LIST' in word_list:
-            image_access[0].append(word_list[1])
-        if 'image' in word_list:
-            image_access[1].append(word_list[5])
+def validate_input(argv):
+    if len(argv) == 2 and argv[1][-4:] == '.asc':
+        return argv[1]
+    else:
+        sys.exit('ERROR: Please provide one valid argument file')
 
-    # Write timestamp and image_name lists to csv file
-    with open((fname[:-4] + '_data.csv'), 'wb') as f:
-        writer = csv.writer(f)
-        writer.writerows(image_access)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv)
 
