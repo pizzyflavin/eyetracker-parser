@@ -33,23 +33,32 @@ def main(argv):
     trials = get_trials(input_file)
 
     # Load data into a csv file
-    column_headers = ['trial',
-                      'trial_type',
-                      'practice',
-                      'image',
-                      'letter',
-                      'locationid',
-                      'location',
-                      'expected',
-                      'TRIAL_INDEX',
-                      'KEYPRESS',
-                      'RESPONSE',
-                      'RT',
-                      'DISP_ON_TIME',
-                      'KEY_RESP_TIME',
-                      'soa',
-                      'SACCADE_RT']
+    keys = ['trial',
+            'trial_type',
+            'practice',
+            'image',
+            'IMG_DISP_TIME',
+            'letter',
+            'locationid',
+            'location',
+            'expected',
+            'TRIAL_INDEX',
+            'KEYPRESS',
+            'RESPONSE',
+            'RT',
+            'DISP_ON_TIME',
+            'KEY_RESP_TIME',
+            'soa',
+            'SACCADE_RT']
 
+    with open(fname[:-4] + '_data.csv', 'wb') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerow(keys)
+        for trial_dict in trials:
+            data = []
+            for key in keys:
+                data.append(trial_dict[key])
+            writer.writerow(data)
 
 def validate_input(argv):
     ''' Ensure input argument is only argument provided and has .asc extension
