@@ -43,6 +43,15 @@ def validate_input(argv):
 
 
 def get_trials(ip_file):
+    ''' Extract trial information from raw text input file
+
+
+    Args:
+        ip_file: string representation of a .asc output file from an
+            eyetracker machine.
+
+    Returns: A list of trial dictionaries
+    '''
     trials = []
     # Get list of trials, each trial is long string
     trials_raw = ip_file.split('START\t')[1:]
@@ -56,44 +65,56 @@ def get_trials(ip_file):
         for i, line in enumerate(trial):
             trial[i] = line.split()
 
-        END_line = get_END_line(trial)
-
-        # Use Constant offsets from END_line number to extract TRIAL_VAR data
-        # and add it to a dictionary
-        try:
-            trial_dict = {
-                    'trial':        trial[END_line + TRIAL_OFFSET][5],
-                    'trial_type':   trial[END_line + TYPE_OFFSET][5],
-                    'practice':     trial[END_line + PRACTICE_OFFSET][0],
-                    'image':        trial[END_line + IMAGE_OFFSET][5],
-                    'letter':       trial[END_line + LETTER_OFFSET][5],
-                    'locationid':   trial[END_line + LOCATIONID_OFFSET][5],
-                    'location':     trial[END_line + LOCATION_OFFSET][5:],
-                    'expected':     trial[END_line + EXPECTED_OFFSET][5],
-                    'TRIAL_INDEX':  trial[END_line + INDEX_OFFSET][5],
-                    'KEYPRESS':     trial[END_line + KEYPRESS_OFFSET][5],
-                    'RESPONSE':     trial[END_line + RESPONSE_OFFSET][5:],
-                    'RT':           trial[END_line + RT_OFFSET][5],
-                    'DISP_ON_TIME': trial[END_line + DISPTIME_OFFSET][5],
-                    'KEY_RESP_TIME':trial[END_line + KEYRESP_OFFSET][5],
-                    'soa':          trial[END_line + SOA_OFFSET][5],
-                    'SACCADE_RT':   trial[END_line + SACCADE_OFFSET][5]
-                    }
-            # Add newly created dict to trials list
-            trials.append(trial_dict)
-
-        except NameError:
-            print('Error adding dict entries. Make sure END_line has value.')
-        except IndexError:
-            print('Check that "trial" has been split appropriately')
-            print('(i.e. "trial" is a list of lines, each of which has been'
-                    'split into a list of words.)')
+        # Add trial to dict
+        to_dict(trial, trials)
 
         # If RESPONSE is CORRECT, look for DRAW_LIST
 
         # Get timestamp of DRAW_LIST line
 
     return trials
+
+
+def to_dict(trial, trial_list):
+    ''' Put trial into dictionary, and add dictionary to list argument.
+
+
+    Args:
+        trial:      Trial to put in dictionary, expects list of lines, each
+            line is a list of words from that line.
+        trial_list: List to which trial will be appended
+    '''
+    END_line = get_END_line(trial)
+    # Use Constant offsets from END_line number to extract TRIAL_VAR data
+    # and add it to a dictionary
+    try:
+        trial_dict = {
+                'trial':        trial[END_line + TRIAL_OFFSET][5],
+                'trial_type':   trial[END_line + TYPE_OFFSET][5],
+                'practice':     trial[END_line + PRACTICE_OFFSET][0],
+                'image':        trial[END_line + IMAGE_OFFSET][5],
+                'letter':       trial[END_line + LETTER_OFFSET][5],
+                'locationid':   trial[END_line + LOCATIONID_OFFSET][5],
+                'location':     trial[END_line + LOCATION_OFFSET][5:],
+                'expected':     trial[END_line + EXPECTED_OFFSET][5],
+                'TRIAL_INDEX':  trial[END_line + INDEX_OFFSET][5],
+                'KEYPRESS':     trial[END_line + KEYPRESS_OFFSET][5],
+                'RESPONSE':     trial[END_line + RESPONSE_OFFSET][5:],
+                'RT':           trial[END_line + RT_OFFSET][5],
+                'DISP_ON_TIME': trial[END_line + DISPTIME_OFFSET][5],
+                'KEY_RESP_TIME':trial[END_line + KEYRESP_OFFSET][5],
+                'soa':          trial[END_line + SOA_OFFSET][5],
+                'SACCADE_RT':   trial[END_line + SACCADE_OFFSET][5]
+                }
+        # Add newly created dict to trials list
+        trial_list.append(trial_dict)
+
+    except NameError:
+        print('Error adding dict entries. Make sure END_line has value.')
+    except IndexError:
+        print('Check that "trial" has been split appropriately')
+        print('(i.e. "trial" is a list of lines, each of which has been'
+                'split into a list of words.)')
 
 
 def get_END_line(trial):
@@ -106,13 +127,17 @@ def get_END_line(trial):
     Returns:
         Returns the line number of first 'END' encountered.
     '''
-    END_line = -1
-    # Find 'END' and get line number
-    for line_num, line in enumerate(trial):
-        if 'END' in line[0]:
-            END_line = line_num 
-            break
-    return END_line
+    try:
+        # Find 'END' and get line number
+        for line_num, line in enumerate(trial):
+            if 'END' in line[0]:
+                END_line = line_num 
+                break
+        return END_line
+    
+    except NameError:
+        print('Error: "END" never found in trial')
+
 
 
 if __name__ == '__main__':
