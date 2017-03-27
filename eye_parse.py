@@ -85,21 +85,16 @@ def get_trials(ip_file):
             trial[j] = line.split()
 
         # Add trial to dict
-        trial_to_dict(trial, trials_list)
+        current_dict = trial_to_dict(trial, trials_list)
 
-        # If RESPONSE is CORRECT, look for DRAW_LIST
-        resp = trials_list[i]['RESPONSE']
-        if 'CORRECT' in resp and len(resp) == 1:
-            # find line with DRAW_LIST
-            DRAW_line = get_line('DRAW_LIST', trial)
-            # Add timestamp to trial dict
+        # Look for DRAW_LIST. If there, get timestamp
+        DRAW_line = get_line('DRAW_LIST', trial)
+        if DRAW_line:
             timestamp = trial[DRAW_line][1]
-            trials_list[i]['IMG_DISP_TIME'] = timestamp
+            # Add timestamp to trial dict
+            current_dict['IMG_DISP_TIME'] = timestamp
         else:
-            trials_list[i]['IMG_DISP_TIME'] = None
-
-        # Get timestamp of DRAW_LIST line
-
+            current_dict['IMG_DISP_TIME'] = None
     return trials_list
 
 
@@ -111,6 +106,8 @@ def trial_to_dict(trial, trial_list):
         trial:      Trial to put in dictionary, expects list of lines, each
             line is a list of words from that line.
         trial_list: List to which trial will be appended
+    Returns:
+        trial_dict: newly created dictionary
     '''
     END_line = get_line('END', trial)
     # Use Constant offsets from END_line number to extract TRIAL_VAR data
@@ -136,7 +133,7 @@ def trial_to_dict(trial, trial_list):
                 }
         # Add newly created dict to trials list
         trial_list.append(trial_dict)
-
+        return trial_dict
     except NameError:
         print('Error adding dict entries. Make sure END_line has value.')
     except IndexError:
@@ -153,16 +150,16 @@ def get_line(pattern, trial):
         trial: Nested list, each line split into list of words.
         pattern: String to look for
     Returns:
-        Returns the line number of first line containing <pattern>
+        pattern_line_num: first line containing <pattern>
+            or False if not found
     '''
-    try:
-        # Find pattern and get line number
-        for line_num, line in enumerate(trial):
-            if pattern in line:
-                return line_num
-
-    except NameError:
-        print('Error: ', '"', pattern, '"', ' never found in trial')
+    # Find pattern and get line number
+    pattern_line_num = False
+    for line_num, line in enumerate(trial):
+        if pattern in line:
+            pattern_line_num = line_num
+            break;
+    return pattern_line_num
 
 
 
