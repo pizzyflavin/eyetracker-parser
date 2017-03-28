@@ -23,13 +23,9 @@ SACCADE_OFFSET =    17
 
 def main(argv):
     # Verify correct input file given
-    fname = validate_input(argv)
+    input_file = validate_input(argv)
 
-    # Open file, read lines into a list
-    with open(fname) as f:
-        input_file = f.read()
-
-    # Put each trial in a dict
+    # Get desired data from each trial
     trials = get_trials(input_file)
 
     # Load data into a csv file
@@ -51,7 +47,7 @@ def main(argv):
             'soa',
             'SACCADE_RT']
 
-    with open(fname[:-4] + '_data.csv', 'wb') as csvfile:
+    with open(input_file[:-4] + '_data.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
         writer.writerow(keys)
         for trial_dict in trials:
@@ -69,7 +65,7 @@ def validate_input(argv):
         sys.exit('ERROR: Please provide one valid argument file')
 
 
-def get_trials(ip_file):
+def get_trials(fname):
     ''' Extract trial information from raw text input file
 
 
@@ -80,9 +76,13 @@ def get_trials(ip_file):
     Returns:
         Returns a list of trial dictionaries
     '''
+    # Open file, read lines into a list
+    with open(fname) as f:
+        input_file = f.read()
+
     trials_list = []
     # Get list of trials, each trial is long string
-    trials_raw = ip_file.split('START\t')[1:]
+    trials_raw = input_file.split('START\t')[1:]
 
     # Split each trial_raw trial from one string into lines
     for i, trial in enumerate(trials_raw):
