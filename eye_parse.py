@@ -133,7 +133,7 @@ def trial_to_dict(trial, trial_list):
                 'expected':     trial[END_line + EXPECTED_OFFSET][5],
                 'TRIAL_INDEX':  trial[END_line + INDEX_OFFSET][5],
                 'KEYPRESS':     trial[END_line + KEYPRESS_OFFSET][5],
-                'RESPONSE':     trial[END_line + RESPONSE_OFFSET][5:],
+                'RESPONSE':     trial[END_line + RESPONSE_OFFSET][5],
                 'RT':           trial[END_line + RT_OFFSET][5],
                 'DISP_ON_TIME': trial[END_line + DISPTIME_OFFSET][5],
                 'KEY_RESP_TIME':trial[END_line + KEYRESP_OFFSET][5],
