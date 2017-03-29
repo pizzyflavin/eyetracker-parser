@@ -125,7 +125,7 @@ def trial_to_dict(trial, trial_list):
         trial_dict = {
                 'trial':        trial[END_line + TRIAL_OFFSET][5],
                 'trial_type':   trial[END_line + TYPE_OFFSET][5],
-                'practice':     trial[END_line + PRACTICE_OFFSET][0],
+                'practice':     trial[END_line + PRACTICE_OFFSET][5],
                 'image':        trial[END_line + IMAGE_OFFSET][5],
                 'letter':       trial[END_line + LETTER_OFFSET][5],
                 'locationid':   trial[END_line + LOCATIONID_OFFSET][5],
