@@ -165,11 +165,11 @@ def get_line(pattern, trial):
     # Find pattern and get line number
     pattern_line_num = False
     for line_num, line in enumerate(trial):
-        if pattern in line:
+        line_str = ' '.join(line)
+        if line_str.find(pattern):
             pattern_line_num = line_num
             break;
     return pattern_line_num
-
 
 
 if __name__ == '__main__':
