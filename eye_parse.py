@@ -172,6 +172,22 @@ def get_line(pattern, trial):
     return pattern_line_num
 
 
+def error_check(trial):
+    ''' Determines if an error occured during data collection in a trial, and
+    if so returns the number of lost messages.
+
+    Args:
+        trial: Nested list of lines, each line split into list of words.
+    Returns:
+        error: The number of messages lost if error found, otherwise False
+    '''
+    error = False
+    err_line = get_line('ERROR MESSAGES LOST', trial)
+    if err_line:
+        error = trial[error_line][5]
+    return error
+
+
 if __name__ == '__main__':
     main(sys.argv)
 
