@@ -166,7 +166,7 @@ def get_line(pattern, trial):
     pattern_line_num = False
     for line_num, line in enumerate(trial):
         line_str = ' '.join(line)
-        if line_str.find(pattern):
+        if line_str.find(pattern) >= 0:
             pattern_line_num = line_num
             break;
     return pattern_line_num
