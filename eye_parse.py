@@ -21,8 +21,8 @@ offsets = {
         'KEYPRESS':         11,
         'RESPONSE':         12,
         'RT':               13,
-        'DISP_ON_TIME':     14,
-        'KEY_RESP_TIME':    15,
+        'DISPLAY_ON_TIME':  14,
+        'KEY_RESPONSE_TIME':15,
         'soa':              16,
         'SACCADE_RT':       17,
         'TRIAL_RESULT':     18
@@ -43,8 +43,8 @@ columns = [
         'KEYPRESS',
         'RESPONSE',
         'RT',
-        'DISP_ON_TIME',
-        'KEY_RESP_TIME',
+        'DISPLAY_ON_TIME',
+        'KEY_RESPONSE_TIME',
         'soa',
         'SACCADE_RT',
         'TRIAL_RESULT'
