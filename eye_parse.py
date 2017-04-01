@@ -3,23 +3,53 @@
 from __future__ import print_function
 import sys, csv
 
+# Constant Definitions
+MISSING_VAL = None
+
 # Constant Offset Values
-TRIAL_OFFSET =      2
-TYPE_OFFSET =       3
-PRACTICE_OFFSET =   4
-IMAGE_OFFSET =      5
-LETTER_OFFSET =     6
-LOCATIONID_OFFSET = 7
-LOCATION_OFFSET =   8
-EXPECTED_OFFSET =   9
-INDEX_OFFSET =      10
-KEYPRESS_OFFSET =   11
-RESPONSE_OFFSET =   12
-RT_OFFSET =         13
-DISPTIME_OFFSET =   14
-KEYRESP_OFFSET =    15
-SOA_OFFSET =        16
-SACCADE_OFFSET =    17
+offsets = {
+        'trial':            2,
+        'trial_type':       3,
+        'practice':         4,
+        'image':            5,
+        'IMG_DISP_TIME':    0,
+        'letter':           6,
+        'locationid':       7,
+        'location':         8,
+        'expected':         9,
+        'TRIAL_INDEX':      10,
+        'KEYPRESS':         11,
+        'RESPONSE':         12,
+        'RT':               13,
+        'DISPLAY_ON_TIME':  14,
+        'KEY_RESPONSE_TIME':15,
+        'soa':              16,
+        'SACCADE_RT':       17,
+        'TRIAL_RESULT':     18
+}
+
+# Column headers
+columns = [
+        'trial',
+        'trial_type',
+        'practice',
+        'image',
+        'IMG_DISP_TIME',
+        'letter',
+        'locationid',
+        'location',
+        'expected',
+        'TRIAL_INDEX',
+        'KEYPRESS',
+        'RESPONSE',
+        'RT',
+        'DISPLAY_ON_TIME',
+        'KEY_RESPONSE_TIME',
+        'soa',
+        'SACCADE_RT',
+        'TRIAL_RESULT'
+]
+
 
 def main(argv):
     # Verify correct input file given
@@ -29,31 +59,13 @@ def main(argv):
     trials = get_trials(input_file)
 
     # Load data into a csv file
-    keys = ['trial',
-            'trial_type',
-            'practice',
-            'image',
-            'IMG_DISP_TIME',
-            'letter',
-            'locationid',
-            'location',
-            'expected',
-            'TRIAL_INDEX',
-            'KEYPRESS',
-            'RESPONSE',
-            'RT',
-            'DISP_ON_TIME',
-            'KEY_RESP_TIME',
-            'soa',
-            'SACCADE_RT']
-
     with open(input_file[:-4] + '_data.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
-        writer.writerow(keys)
+        writer.writerow(columns)
         for trial_dict in trials:
             data = []
-            for key in keys:
-                data.append(trial_dict[key])
+            for column in columns:
+                data.append(trial_dict[column])
             writer.writerow(data)
 
 def validate_input(argv):
@@ -93,6 +105,8 @@ def get_trials(fname):
         for j, line in enumerate(trial):
             trial[j] = line.split()
 
+
+
         # Add trial to dict
         current_dict = trial_to_dict(trial, trials_list)
 
@@ -103,7 +117,7 @@ def get_trials(fname):
             # Add timestamp to trial dict
             current_dict['IMG_DISP_TIME'] = timestamp
         else:
-            current_dict['IMG_DISP_TIME'] = None
+            current_dict['IMG_DISP_TIME'] = MISSING_VAL
     return trials_list
 
 
@@ -118,37 +132,38 @@ def trial_to_dict(trial, trial_list):
     Returns:
         trial_dict: newly created dictionary
     '''
+
     END_line = get_line('END', trial)
-    # Use Constant offsets from END_line number to extract TRIAL_VAR data
-    # and add it to a dictionary
-    try:
-        trial_dict = {
-                'trial':        trial[END_line + TRIAL_OFFSET][5],
-                'trial_type':   trial[END_line + TYPE_OFFSET][5],
-                'practice':     trial[END_line + PRACTICE_OFFSET][5],
-                'image':        trial[END_line + IMAGE_OFFSET][5],
-                'letter':       trial[END_line + LETTER_OFFSET][5],
-                'locationid':   trial[END_line + LOCATIONID_OFFSET][5],
-                'location':     trial[END_line + LOCATION_OFFSET][5:],
-                'expected':     trial[END_line + EXPECTED_OFFSET][5],
-                'TRIAL_INDEX':  trial[END_line + INDEX_OFFSET][5],
-                'KEYPRESS':     trial[END_line + KEYPRESS_OFFSET][5],
-                'RESPONSE':     trial[END_line + RESPONSE_OFFSET][5],
-                'RT':           trial[END_line + RT_OFFSET][5],
-                'DISP_ON_TIME': trial[END_line + DISPTIME_OFFSET][5],
-                'KEY_RESP_TIME':trial[END_line + KEYRESP_OFFSET][5],
-                'soa':          trial[END_line + SOA_OFFSET][5],
-                'SACCADE_RT':   trial[END_line + SACCADE_OFFSET][5]
-                }
-        # Add newly created dict to trials list
-        trial_list.append(trial_dict)
-        return trial_dict
-    except NameError:
-        print('Error adding dict entries. Make sure END_line has value.')
-    except IndexError:
-        print('Check that "trial" has been split appropriately')
-        print('(i.e. "trial" is a list of lines, each of which has been'
-                'split into a list of words.)')
+    # Build list of keys for trial dict
+    keys = columns
+    missing_keys = []
+    # Check for errors in trial
+    error = error_check(trial)
+    if error:
+        err_num = error
+        keys = columns[:-err_num]
+        missing_keys = columns[-err_num:]
+
+    trial_dict = {}
+    # Pair keys and values
+    for key in keys:
+        line = trial[END_line + offsets[key]]
+        if key in line:
+            # Special case, data in different format
+            if key == 'TRIAL_RESULT':
+                value = line[3]
+            # Normal data format
+            else:
+                value = line_to_val(line)
+            trial_dict[key] = value
+    if missing_keys:
+        # If missing keys, pair with none and add to trial_dict
+        for key in missing_keys:
+            trial_dict[key] = MISSING_VAL
+
+    # Add newly created dict to trials list
+    trial_list.append(trial_dict)
+    return trial_dict
 
 
 def get_line(pattern, trial):
@@ -165,11 +180,38 @@ def get_line(pattern, trial):
     # Find pattern and get line number
     pattern_line_num = False
     for line_num, line in enumerate(trial):
-        if pattern in line:
+        line_str = ' '.join(line)
+        if line_str.find(pattern) >= 0:
             pattern_line_num = line_num
             break;
     return pattern_line_num
 
+
+def error_check(trial):
+    ''' Determines if an error occured during data collection in a trial, and
+    if so returns the number of lost messages.
+
+    Args:
+        trial: Nested list of lines, each line split into list of words.
+    Returns:
+        error: The number of messages lost if error found, otherwise False
+    '''
+    error = False
+    err_line = get_line('ERROR MESSAGES LOST', trial)
+    if err_line:
+        error = int(trial[err_line][5])
+    return error
+
+
+def line_to_val(line):
+    size = len(line)
+    # If standard format, just return last string in line
+    val = line[5]
+    # If non-standard, add extra data
+    if size > 6:
+        for i in range(6, size):
+            val = val + line[i]
+    return val
 
 
 if __name__ == '__main__':
