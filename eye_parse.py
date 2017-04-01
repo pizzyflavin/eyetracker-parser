@@ -3,6 +3,9 @@
 from __future__ import print_function
 import sys, csv
 
+# Constant Definitions
+MISSING_VAL = None
+
 # Constant Offset Values
 offsets = {
         'trial':            2,
@@ -114,7 +117,7 @@ def get_trials(fname):
             # Add timestamp to trial dict
             current_dict['IMG_DISP_TIME'] = timestamp
         else:
-            current_dict['IMG_DISP_TIME'] = None
+            current_dict['IMG_DISP_TIME'] = MISSING_VAL
     return trials_list
 
 
@@ -149,7 +152,7 @@ def trial_to_dict(trial, trial_list):
             trial_dict[key] = value
     # If missing keys, pair with none and add to trial_dict
     for key in missing_keys:
-        trial_dict[key] = None
+        trial_dict[key] = MISSING_VAL
 
     # Add newly created dict to trials list
     trial_list.append(trial_dict)
