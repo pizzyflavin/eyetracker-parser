@@ -61,11 +61,11 @@ def main(argv):
     # Load data into a csv file
     with open(input_file[:-4] + '_data.csv', 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=',')
-        writer.writerow(keys)
+        writer.writerow(columns)
         for trial_dict in trials:
             data = []
-            for key in keys:
-                data.append(trial_dict[key])
+            for column in columns:
+                data.append(trial_dict[column])
             writer.writerow(data)
 
 def validate_input(argv):
@@ -136,12 +136,13 @@ def trial_to_dict(trial, trial_list):
     END_line = get_line('END', trial)
     # Build list of keys for trial dict
     keys = columns
+    missing_keys = []
     # Check for errors in trial
     error = error_check(trial)
     if error:
         err_num = error
         keys = columns[:-err_num]
-        missing_keys = columns[-err_num]
+        missing_keys = columns[-err_num:]
 
     trial_dict = {}
     # Pair keys and values
@@ -150,9 +151,10 @@ def trial_to_dict(trial, trial_list):
         if key in line:
             value = line[5:]
             trial_dict[key] = value
-    # If missing keys, pair with none and add to trial_dict
-    for key in missing_keys:
-        trial_dict[key] = MISSING_VAL
+    if missing_keys:
+        # If missing keys, pair with none and add to trial_dict
+        for key in missing_keys:
+            trial_dict[key] = MISSING_VAL
 
     # Add newly created dict to trials list
     trial_list.append(trial_dict)
