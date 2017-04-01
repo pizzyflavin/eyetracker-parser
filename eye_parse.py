@@ -149,7 +149,12 @@ def trial_to_dict(trial, trial_list):
     for key in keys:
         line = trial[END_line + offsets[key]]
         if key in line:
-            value = line[5:]
+            # Special case, data in different format
+            if key == 'TRIAL_RESULT':
+                value = line[3]
+            # Normal data format
+            else:
+                value = line_to_val(line)
             trial_dict[key] = value
     if missing_keys:
         # If missing keys, pair with none and add to trial_dict
@@ -199,7 +204,14 @@ def error_check(trial):
 
 
 def line_to_val(line):
-    a = 0 # TODO
+    size = len(line)
+    # If standard format, just return last string in line
+    val = line[5]
+    # If non-standard, add extra data
+    if size > 6:
+        for i in range(6, size):
+            val = val + line[i]
+    return val
 
 
 if __name__ == '__main__':
