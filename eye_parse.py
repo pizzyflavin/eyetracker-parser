@@ -93,25 +93,27 @@ def get_trials(fname):
     with open(fname) as f:
         input_file = f.read()
 
+    # Empty list to which dicts of trial info will be appended
     trials_list = []
-    # Get list of trials, each trial is long string
+
+    # Get list of trials, each trial is one continuous string
     trials_raw = input_file.split('START\t')[1:]
 
-    # Split each trial_raw trial from one string into lines
+    # Split each trial into a list of lines 
     for i, trial in enumerate(trials_raw):
         trials_raw[i] = trial.splitlines()
 
-    # Split each trial line into a list of words
+    # Split each line into a list of words
     for i, trial in enumerate(trials_raw):
         for j, line in enumerate(trial):
             trial[j] = line.split()
 
 
 
-        # Add trial to dict
+        # Process trial and then add trial to dict
         current_dict = trial_to_dict(trial, trials_list)
 
-        # Look for DRAW_LIST. If there, get timestamp
+        # Look for DRAW_LIST and add as entry to dict
         DRAW_line = get_line('DRAW_LIST', trial)
         if DRAW_line:
             timestamp = trial[DRAW_line][1]
@@ -119,6 +121,7 @@ def get_trials(fname):
             current_dict['IMG_DISP_TIME'] = timestamp
         else:
             current_dict['IMG_DISP_TIME'] = MISSING_VAL
+
     return trials_list
 
 
@@ -135,17 +138,21 @@ def trial_to_dict(trial, trial_list):
     '''
 
     END_line = get_line('END', trial)
+
     # Build list of keys for trial dict
     keys = columns
     missing_keys = []
+
     # Check for errors in trial
     error = error_check(trial)
+
     if error:
         err_num = error
         keys = columns[:-err_num]
         missing_keys = columns[-err_num:]
 
     trial_dict = {}
+
     # Pair keys and values
     for key in keys:
         line = trial[END_line + offsets[key]]
@@ -157,6 +164,7 @@ def trial_to_dict(trial, trial_list):
             else:
                 value = line_to_val(line)
             trial_dict[key] = value
+
     if missing_keys:
         # If missing keys, pair with none and add to trial_dict
         for key in missing_keys:
@@ -164,6 +172,7 @@ def trial_to_dict(trial, trial_list):
 
     # Add newly created dict to trials list
     trial_list.append(trial_dict)
+
     return trial_dict
 
 
@@ -180,11 +189,13 @@ def get_line(pattern, trial):
     '''
     # Find pattern and get line number
     pattern_line_num = False
+
     for line_num, line in enumerate(trial):
         line_str = ' '.join(line)
         if line_str.find(pattern) >= 0:
             pattern_line_num = line_num
             break;
+
     return pattern_line_num
 
 
@@ -199,19 +210,24 @@ def error_check(trial):
     '''
     error = False
     err_line = get_line('ERROR MESSAGES LOST', trial)
+
     if err_line:
         error = int(trial[err_line][5])
+
     return error
 
 
 def line_to_val(line):
     size = len(line)
+
     # If standard format, just return last string in line
     val = line[5]
+
     # If non-standard, add extra data
     if size > 6:
         for i in range(6, size):
             val = val + line[i]
+
     return val
 
 
