@@ -25,7 +25,8 @@ offsets = {
         'KEY_RESPONSE_TIME':15,
         'soa':              16,
         'SACCADE_RT':       17,
-        'TRIAL_RESULT':     18
+        'TRIAL_RESULT':     18,
+        'AVG_PDIAM_DIFF':   0
 }
 
 # Column headers
@@ -48,7 +49,7 @@ columns = [
         'soa',
         'SACCADE_RT',
         'TRIAL_RESULT',
-        'AVG_PUPILDIAM_DIFF'
+        'AVG_PDIAM_DIFF'
 ]
 
 
@@ -108,8 +109,6 @@ def get_trials(fname):
         for j, line in enumerate(trial):
             trial[j] = line.split()
 
-
-
         # Process trial and then add trial to dict
         current_dict = trial_to_dict(trial, trials_list)
 
@@ -117,10 +116,61 @@ def get_trials(fname):
         DRAW_line = get_line('DRAW_LIST', trial)
         if DRAW_line:
             timestamp = trial[DRAW_line][1]
+
             # Add timestamp to trial dict
             current_dict['IMG_DISP_TIME'] = timestamp
+
+            # Get 250 samples before stimulus
+            before_pupil_diam = []
+            sample = 1
+            line_offset = 1
+
+            while True:
+                line = trial[DRAW_line - line_offset]
+
+                # Verify line is sample data
+                if line[0].isdigit():
+                    sample_time = line[0]
+                    # Get pupil diameter from 4th column
+                    before_pupil_diam.append(line[3])
+                    sample += 1
+
+                line_offset += 1
+                # Are we there yet?
+                if sample > 250:
+                    break
+
+            before_average = get_average(before_pupil_diam)
+
+            # Get 250 samples after stimulus
+            after_pupil_diam = []
+            sample = 1
+            line_offset = 1
+
+            while True:
+                line = trial[DRAW_line + line_offset]
+
+                # Verify line is sample data
+                if line[0].isdigit():
+                    sample_time = line[0]
+                    # Get pupil diameter from 4th column
+                    after_pupil_diam.append(line[3])
+                    sample += 1
+
+                line_offset += 1
+                # Are we there yet?
+                if sample > 250:
+                    break
+
+            after_average = get_average(after_pupil_diam)
+
+            # Get difference in average pupil diamter:
+            avg_pdiam_diff= after_average - before_average
+
+            current_dict['AVG_PDIAM_DIFF'] = avg_pdiam_diff
         else:
             current_dict['IMG_DISP_TIME'] = MISSING_VAL
+            current_dict['AVG_PDIAM_DIFF'] = MISSING_VAL
 
     return trials_list
 
@@ -218,6 +268,7 @@ def error_check(trial):
 
 
 def line_to_val(line):
+
     size = len(line)
 
     # If standard format, just return last string in line
@@ -229,6 +280,14 @@ def line_to_val(line):
             val = val + line[i]
 
     return val
+
+def get_average(list_num_strings):
+
+    avg_sum = 0.0
+    for i in range(len(list_num_strings)):
+        avg_sum += float(list_num_strings[i])
+
+    return avg_sum / len(list_num_strings)
 
 
 if __name__ == '__main__':
