@@ -47,7 +47,8 @@ columns = [
         'KEY_RESPONSE_TIME',
         'soa',
         'SACCADE_RT',
-        'TRIAL_RESULT'
+        'TRIAL_RESULT',
+        'AVG_PUPILDIAM_DIFF'
 ]
 
 
