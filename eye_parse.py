@@ -13,6 +13,7 @@ offsets = {
         'practice':         4,
         'image':            5,
         'IMG_DISP_TIME':    0,
+        'AVG_PDIAM_DIFF':   0,
         'letter':           6,
         'locationid':       7,
         'location':         8,
@@ -25,8 +26,7 @@ offsets = {
         'KEY_RESPONSE_TIME':15,
         'soa':              16,
         'SACCADE_RT':       17,
-        'TRIAL_RESULT':     18,
-        'AVG_PDIAM_DIFF':   0
+        'TRIAL_RESULT':     18
 }
 
 # Column headers
@@ -36,6 +36,7 @@ columns = [
         'practice',
         'image',
         'IMG_DISP_TIME',
+        'AVG_PDIAM_DIFF',
         'letter',
         'locationid',
         'location',
@@ -48,8 +49,7 @@ columns = [
         'KEY_RESPONSE_TIME',
         'soa',
         'SACCADE_RT',
-        'TRIAL_RESULT',
-        'AVG_PDIAM_DIFF'
+        'TRIAL_RESULT'
 ]
 
 
