@@ -153,9 +153,14 @@ def get_trials(fname):
                 # Verify line is sample data
                 if line[0].isdigit():
                     sample_time = line[0]
-                    # Get pupil diameter from 4th column
-                    after_pupil_diam.append(line[3])
-                    sample += 1
+
+                    # If pupil area = 0.0, throw sample away
+                    if line[3] == '0.0':
+                        # Throw away sample
+                    else:
+                        # Get pupil diameter from 4th column
+                        after_pupil_diam.append(line[3])
+                        sample += 1
 
                 line_offset += 1
                 # Are we there yet?
@@ -287,7 +292,9 @@ def get_average(list_num_strings):
     for i in range(len(list_num_strings)):
         avg_sum += float(list_num_strings[i])
 
-    return avg_sum / len(list_num_strings)
+    average = avg_sum / len(list_num_strings)
+
+    return average
 
 
 if __name__ == '__main__':
