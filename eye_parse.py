@@ -13,7 +13,7 @@ offsets = {
         'practice':         4,
         'image':            5,
         'IMG_DISP_TIME':    0,
-        'AVG_PDIAM_DIFF':   0,
+        'AVG_P_AREA_DIFF':  0,
         'letter':           6,
         'locationid':       7,
         'location':         8,
@@ -36,7 +36,7 @@ columns = [
         'practice',
         'image',
         'IMG_DISP_TIME',
-        'AVG_PDIAM_DIFF',
+        'AVG_P_AREA_DIFF',
         'letter',
         'locationid',
         'location',
@@ -121,7 +121,7 @@ def get_trials(fname):
             current_dict['IMG_DISP_TIME'] = timestamp
 
             # Get 250 samples before stimulus
-            before_pupil_diam = []
+            before_pupil_area = []
             sample = 1
             line_offset = 1
 
@@ -131,8 +131,8 @@ def get_trials(fname):
                 # Verify line is sample data
                 if line[0].isdigit():
                     sample_time = line[0]
-                    # Get pupil diameter from 4th column
-                    before_pupil_diam.append(line[3])
+                    # Get pupil area from 4th column
+                    before_pupil_area.append(line[3])
                     sample += 1
 
                 line_offset += 1
@@ -140,10 +140,10 @@ def get_trials(fname):
                 if sample > 250:
                     break
 
-            before_average = get_average(before_pupil_diam)
+            before_average = get_average(before_pupil_area)
 
             # Get 250 samples after stimulus
-            after_pupil_diam = []
+            after_pupil_area = []
             sample = 1
             line_offset = 1
 
@@ -156,8 +156,8 @@ def get_trials(fname):
 
                     # If pupil area = 0.0, don't use sample
                     if line[3] != '0.0':
-                        # Get pupil diameter from 4th column
-                        after_pupil_diam.append(line[3])
+                        # Get pupil area from 4th column
+                        after_pupil_area.append(line[3])
 
                     # Consider a sample even if thrown away
                     sample += 1
@@ -167,15 +167,15 @@ def get_trials(fname):
                 if sample > 250:
                     break
 
-            after_average = get_average(after_pupil_diam)
+            after_average = get_average(after_pupil_area)
 
-            # Get difference in average pupil diamter:
-            avg_pdiam_diff= after_average - before_average
+            # Get difference in average pupil area:
+            pupil_area_diff = after_average - before_average
 
-            current_dict['AVG_PDIAM_DIFF'] = avg_pdiam_diff
+            current_dict['AVG_P_AREA_DIFF'] = pupil_area_diff
         else:
             current_dict['IMG_DISP_TIME'] = MISSING_VAL
-            current_dict['AVG_PDIAM_DIFF'] = MISSING_VAL
+            current_dict['AVG_P_AREA_DIFF'] = MISSING_VAL
 
     return trials_list
 
