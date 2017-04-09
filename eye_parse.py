@@ -154,13 +154,13 @@ def get_trials(fname):
                 if line[0].isdigit():
                     sample_time = line[0]
 
-                    # If pupil area = 0.0, throw sample away
-                    if line[3] == '0.0':
-                        # Throw away sample
-                    else:
+                    # If pupil area = 0.0, don't use sample
+                    if line[3] != '0.0':
                         # Get pupil diameter from 4th column
                         after_pupil_diam.append(line[3])
-                        sample += 1
+
+                    # Consider a sample even if thrown away
+                    sample += 1
 
                 line_offset += 1
                 # Are we there yet?
