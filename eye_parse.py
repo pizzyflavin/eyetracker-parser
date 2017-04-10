@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import sys, csv
+import math
 
 # Constant Definitions
 MISSING_VAL = None
@@ -13,7 +14,8 @@ offsets = {
         'practice':         4,
         'image':            5,
         'IMG_DISP_TIME':    0,
-        'AVG_P_AREA_DIFF':  0,
+        'AVG_P_DIAM_BEFORE':0,
+        'AVG_P_DIAM_AFTER': 0,
         'letter':           6,
         'locationid':       7,
         'location':         8,
@@ -36,7 +38,8 @@ columns = [
         'practice',
         'image',
         'IMG_DISP_TIME',
-        'AVG_P_AREA_DIFF',
+        'AVG_P_DIAM_BEFORE',
+        'AVG_P_DIAM_AFTER',
         'letter',
         'locationid',
         'location',
@@ -121,7 +124,7 @@ def get_trials(fname):
             current_dict['IMG_DISP_TIME'] = timestamp
 
             # Get 250 samples before stimulus
-            before_pupil_area = []
+            before_pupil_diam = []
             sample = 1
             line_offset = 1
 
@@ -130,34 +133,12 @@ def get_trials(fname):
 
                 # Verify line is sample data
                 if line[0].isdigit():
-                    sample_time = line[0]
-                    # Get pupil area from 4th column
-                    before_pupil_area.append(line[3])
-                    sample += 1
-
-                line_offset += 1
-                # Are we there yet?
-                if sample > 250:
-                    break
-
-            before_average = get_average(before_pupil_area)
-
-            # Get 250 samples after stimulus
-            after_pupil_area = []
-            sample = 1
-            line_offset = 1
-
-            while True:
-                line = trial[DRAW_line + line_offset]
-
-                # Verify line is sample data
-                if line[0].isdigit():
-                    sample_time = line[0]
-
                     # If pupil area = 0.0, don't use sample
                     if line[3] != '0.0':
-                        # Get pupil area from 4th column
-                        after_pupil_area.append(line[3])
+                        # Get pupil area from 4th column and calculate diameter
+                        p_area = (line[3])
+                        p_diam = get_diameter(p_area)
+                        before_pupil_diam.append(p_diam)
 
                     # Consider a sample even if thrown away
                     sample += 1
@@ -167,15 +148,44 @@ def get_trials(fname):
                 if sample > 250:
                     break
 
-            after_average = get_average(after_pupil_area)
+            pdiam_avg_before = get_average(before_pupil_diam)
 
-            # Get difference in average pupil area:
-            pupil_area_diff = after_average - before_average
+            # Get 250 samples after stimulus
+            after_pupil_diam = []
+            sample = 1
+            line_offset = 1
 
-            current_dict['AVG_P_AREA_DIFF'] = pupil_area_diff
+            while True:
+                line = trial[DRAW_line + line_offset]
+
+                # Verify line is sample data
+                if line[0].isdigit():
+                    # If pupil area = 0.0, don't use sample
+                    if line[3] != '0.0':
+                        # Get pupil area from 4th column and calculate diameter
+                        p_area = (line[3])
+                        p_diam = get_diameter(p_area)
+                        after_pupil_diam.append(p_diam)
+
+                    # Consider a sample even if thrown away
+                    sample += 1
+
+                line_offset += 1
+                # Are we there yet?
+                if sample > 250:
+                    break
+
+            pdiam_avg_after = get_average(after_pupil_diam)
+
+            # Get difference in average pupil diameter:
+
+            current_dict['AVG_P_DIAM_BEFORE'] = pdiam_avg_before
+            current_dict['AVG_P_DIAM_AFTER'] = pdiam_avg_after
         else:
             current_dict['IMG_DISP_TIME'] = MISSING_VAL
-            current_dict['AVG_P_AREA_DIFF'] = MISSING_VAL
+
+            current_dict['AVG_P_DIAM_BEFORE'] = MISSING_VAL
+            current_dict['AVG_P_DIAM_AFTER'] = MISSING_VAL
 
     return trials_list
 
@@ -286,6 +296,7 @@ def line_to_val(line):
 
     return val
 
+
 def get_average(list_num_strings):
 
     avg_sum = 0.0
@@ -295,6 +306,15 @@ def get_average(list_num_strings):
     average = avg_sum / len(list_num_strings)
 
     return average
+
+
+def get_diameter(area_string):
+
+    area = float(area_string)
+    diameter = 2.0 * math.sqrt(area / math.pi)
+    diameter_string = str(diameter)
+
+    return diameter_string
 
 
 if __name__ == '__main__':
