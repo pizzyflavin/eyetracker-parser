@@ -20,3 +20,5 @@ terminal while in the project:
 `./eye_parse.py <file>.asc`  
 You should now have a csv file that presents the sample data to you in
 a non-proprietary format.
+
+Test data is located in `external/test_data/`
