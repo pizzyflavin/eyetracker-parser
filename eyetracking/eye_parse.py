@@ -1,34 +1,34 @@
 #! /usr/bin/env python
 
 from __future__ import print_function
-import sys, csv
 import math
+import sys
+import csv
 
 # Constant Definitions
 MISSING_VAL = None
+MYNAME = 'Ricky'
 
 # Constant Offset Values
 offsets = {
-        'trial':            2,
-        'trial_type':       3,
-        'practice':         4,
-        'image':            5,
-        'IMG_DISP_TIME':    0,
-        'AVG_P_DIAM_BEFORE':0,
-        'AVG_P_DIAM_AFTER': 0,
-        'letter':           6,
-        'locationid':       7,
-        'location':         8,
-        'expected':         9,
-        'TRIAL_INDEX':      10,
-        'KEYPRESS':         11,
-        'RESPONSE':         12,
-        'RT':               13,
-        'DISPLAY_ON_TIME':  14,
-        'KEY_RESPONSE_TIME':15,
-        'soa':              16,
-        'SACCADE_RT':       17,
-        'TRIAL_RESULT':     18
+        'trial':                2,
+        'trial_type':           3,
+        'practice':             4,
+        'image':                5,
+        'IMG_DISP_TIME':        0,
+        'letter':               6,
+        'locationid':           7,
+        'location':             8,
+        'expected':             9,
+        'TRIAL_INDEX':          10,
+        'KEYPRESS':             11,
+        'RESPONSE':             12,
+        'RT':                   13,
+        'DISPLAY_ON_TIME':      14,
+        'KEY_RESPONSE_TIME':    15,
+        'soa':                  16,
+        'SACCADE_RT':           17,
+        'TRIAL_RESULT':         18
 }
 
 # Column headers
@@ -73,6 +73,7 @@ def main(argv):
                 data.append(trial_dict[column])
             writer.writerow(data)
 
+
 def validate_input(argv):
     ''' Ensure input argument is only argument provided and has .asc extension
     '''
@@ -103,7 +104,7 @@ def get_trials(fname):
     # Get list of trials, each trial is one continuous string
     trials_raw = input_file.split('START\t')[1:]
 
-    # Split each trial into a list of lines 
+    # Split each trial into a list of lines
     for i, trial in enumerate(trials_raw):
         trials_raw[i] = trial.splitlines()
 
@@ -112,7 +113,7 @@ def get_trials(fname):
         for j, line in enumerate(trial):
             trial[j] = line.split()
 
-        # Process trial and then add trial to dict
+        # Add trial to dict
         current_dict = trial_to_dict(trial, trials_list)
 
         # Look for DRAW_LIST and add as entry to dict
@@ -259,8 +260,7 @@ def get_line(pattern, trial):
         line_str = ' '.join(line)
         if line_str.find(pattern) >= 0:
             pattern_line_num = line_num
-            break;
-
+            break
     return pattern_line_num
 
 
@@ -319,4 +319,3 @@ def get_diameter(area_string):
 
 if __name__ == '__main__':
     main(sys.argv)
-
