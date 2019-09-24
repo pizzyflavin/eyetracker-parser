@@ -1,6 +1,4 @@
-# Eyetracking
-
-## ...with Python!
+# Eyetracker Parser
 
 This project is for analyzing data from an eye-tracking machine that a friend
 was using for a grad school assignment.
